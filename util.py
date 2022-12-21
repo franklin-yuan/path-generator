@@ -1,6 +1,14 @@
 import pygame as pg 
 import numpy as np
 
+def runOnce(f):
+    def wrapper(*args, **kwargs):
+        if not wrapper.has_run:
+            wrapper.has_run = True
+            return f(*args, **kwargs)
+    wrapper.has_run = False
+    return wrapper
+    
 def drawDashedLine(surface, color, start_pos, end_pos, width = 1, dash_length = 10, exclude_corners = True):
     
     # convert tuples to numpy arrays
@@ -18,3 +26,28 @@ def drawDashedLine(surface, color, start_pos, end_pos, width = 1, dash_length = 
 
     return [pg.draw.line(surface, color, tuple(dash_knots[n]), tuple(dash_knots[n+1]), width)
             for n in range(int(exclude_corners), dash_amount - int(exclude_corners), 2)]
+
+def drag(event, ticks, ar1 = [], ar2 = []): #ar1 and ar2 are arrays of objects that can be clicked
+
+    if event.type == pg.MOUSEBUTTONDOWN:
+        if event.button == 1:
+            clicked = True
+    elif event.type == pg.MOUSEBUTTONUP:
+        clicked = False
+    else:
+        pass
+    
+    if clicked == True:
+        print("AAAAAA")
+        pos = pg.mouse.get_pos()
+        x = pos[0]
+        y = pos[1]
+        if event.button == 1:
+            for object in ar1:
+                if object.collidepoint(pos):
+                    object.x = x - (object.width / 2)
+                    object.y = y - (object.height / 2)
+            for object in ar2:
+                if object.collidepoint(pos):
+                    object.x = x - (object.width / 2)
+                    object.y = y - (object.height / 2)
