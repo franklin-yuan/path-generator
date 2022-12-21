@@ -1,6 +1,7 @@
 import os
 import pygame as pg 
 import hermite as hm
+import util 
 
 pg.font.init()
 
@@ -9,11 +10,16 @@ WIDTH, HEIGHT = 876, 900
 WIN = pg.display.set_mode((WIDTH, HEIGHT))
 pg.display.set_caption("Spline Tool")
 
-BLACK    = (   0,   0,   0)
-WHITE    = ( 255, 255, 255)
-BLUE =      (  0,   0, 255)
-GREEN =     (  0, 255,   0)
-RED =       (255,   0,   0)
+BLACK      = (   0,   0,   0)
+WHITE      = ( 255, 255, 255)
+BLUE       = (  0,   0, 255)
+GREEN      = (  0, 255,   0)
+RED        = (255,   0,   0)
+DUSTYBLUE  = (136, 155, 174)
+PASTELBLUE = (174, 198, 207)
+PASTELRED  = (255, 105,  97)
+GRAY       = (100, 100, 100)
+GRAINSBORO = (220, 220, 220)
 
 userPoints = []
 ctrlPoints = []
@@ -21,8 +27,8 @@ ctrlPoints = []
 FPS = 60
 FIELD_WIDTH, FIELD_HEIGHT = 876, 594
 ROBOT_WIDTH, ROBOT_HEIGHT = 60, 60
-USER_POINT_WIDTH, USER_POINT_HEIGHT = 5, 5
-CTRL_POINT_WIDTH, CTRL_POINT_HEIGHT = 4, 4
+USER_POINT_WIDTH, USER_POINT_HEIGHT = 8, 8
+CTRL_POINT_WIDTH, CTRL_POINT_HEIGHT = 6, 6
 BORDER_WIDTH, BORDER_HEIGHT = 550, 550
 
 BORDER = pg.Rect((FIELD_WIDTH- BORDER_WIDTH) / 2, (FIELD_HEIGHT - BORDER_HEIGHT) / 2, BORDER_WIDTH, BORDER_HEIGHT)
@@ -83,7 +89,7 @@ def drawUserPoint(): #draws the user point when f is pushed
         
 def updateUserPoint():
     for userPoint in userPoints:
-        pg.draw.circle(WIN, RED, (userPoint.x, userPoint.y), USER_POINT_HEIGHT)
+        pg.draw.circle(WIN, DUSTYBLUE, (userPoint.x, userPoint.y), USER_POINT_HEIGHT, 3)
     
 def drawCtrlPoint(pos): #draws the control point for tge point created when f is pushed
     if pos[1] >= ACTIVE_RANGE_Y[0] + CONTROL_SHIFT_HEIGHT: #if at top of the screen
@@ -96,10 +102,12 @@ def drawCtrlPoint(pos): #draws the control point for tge point created when f is
     ctrlPoint = pg.Rect(newPos[0], newPos[1], CTRL_POINT_WIDTH, CTRL_POINT_HEIGHT)
     ctrlPoints.append(ctrlPoint)
 
-def updateCtrlPoint():
+def updateCtrlPoint(): #updates the control point's pos as well as draw the line between the user point and the ctrl point
+    i = 0
     for ctrlPoint in ctrlPoints:
-        pg.draw.circle(WIN, BLUE, (ctrlPoint.x, ctrlPoint.y), CTRL_POINT_HEIGHT)
-    
+        pg.draw.circle(WIN, PASTELBLUE, (ctrlPoint.x, ctrlPoint.y), CTRL_POINT_HEIGHT, 3) 
+        util.drawDashedLine(WIN, GRAINSBORO, (userPoints[i].x, userPoints[i].y), (ctrlPoint.x, ctrlPoint.y), 3, 3)
+        i += 1
     
     
     
