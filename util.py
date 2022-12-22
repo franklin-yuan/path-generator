@@ -28,7 +28,11 @@ def drawDashedLine(surface, color, start_pos, end_pos, width = 1, dash_length = 
             for n in range(int(exclude_corners), dash_amount - int(exclude_corners), 2)]
 
 def drag(event, ticks, ar1 = [], ar2 = []): #ar1 and ar2 are arrays of objects that can be clicked
-
+    global clicked
+    pos = pg.mouse.get_pos()
+    x = pos[0]
+    y = pos[1]
+    
     if event.type == pg.MOUSEBUTTONDOWN:
         if event.button == 1:
             clicked = True
@@ -37,17 +41,11 @@ def drag(event, ticks, ar1 = [], ar2 = []): #ar1 and ar2 are arrays of objects t
     else:
         pass
     
-    if clicked == True:
-        print("AAAAAA")
-        pos = pg.mouse.get_pos()
-        x = pos[0]
-        y = pos[1]
-        if event.button == 1:
-            for object in ar1:
-                if object.collidepoint(pos):
-                    object.x = x - (object.width / 2)
-                    object.y = y - (object.height / 2)
-            for object in ar2:
-                if object.collidepoint(pos):
-                    object.x = x - (object.width / 2)
-                    object.y = y - (object.height / 2)
+    for object in ar1:
+        if object.collidepoint(pos) and clicked:
+            object.x = x - (object.width / 2)
+            object.y = y - (object.height / 2)
+    for object in ar2:
+        if object.collidepoint(pos) and clicked:
+            object.x = x - (object.width / 2)
+            object.y = y - (object.height / 2)
