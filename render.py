@@ -24,13 +24,14 @@ GRAINSBORO = (220, 220, 220)
 userPoints = []
 ctrlPoints = []
 
-ticks = 0
-
 FPS = 60
+
 FIELD_WIDTH, FIELD_HEIGHT = 876, 594
 ROBOT_WIDTH, ROBOT_HEIGHT = 60, 60
-USER_POINT_WIDTH, USER_POINT_HEIGHT = 8, 8
-CTRL_POINT_WIDTH, CTRL_POINT_HEIGHT = 6, 6
+USER_POINT_WIDTH, USER_POINT_HEIGHT = 20, 20
+CTRL_POINT_WIDTH, CTRL_POINT_HEIGHT = 16, 16
+USER_CIRCLE_RAD = USER_POINT_WIDTH / 2
+CTRL_CIRCLE_RAD = CTRL_POINT_WIDTH / 2
 BORDER_WIDTH, BORDER_HEIGHT = 550, 550
 
 BORDER = pg.Rect((FIELD_WIDTH- BORDER_WIDTH) / 2, (FIELD_HEIGHT - BORDER_HEIGHT) / 2, BORDER_WIDTH, BORDER_HEIGHT)
@@ -83,15 +84,16 @@ def scaleCoords(pos): #scales coordinates selected to 10 x 10
     
 def drawUserPoint(): #draws the user point when f is pushed
     pos = getMousePos()
+    corner = (pos[0] - (USER_POINT_WIDTH / 2), pos[1] - (USER_POINT_HEIGHT / 2))
     if pos[0] >= ACTIVE_RANGE_X[0] and pos[0] <= ACTIVE_RANGE_X[1] and pos[1] >= ACTIVE_RANGE_Y[0] and pos[1] <= ACTIVE_RANGE_Y[1]: #check if mouse pointer is within the field image
-        userPoint = pg.Rect(pos[0], pos[1], USER_POINT_WIDTH, USER_POINT_HEIGHT)
-        drawCtrlPoint(pos)
+        userPoint = pg.Rect(corner[0], corner[1], USER_POINT_WIDTH, USER_POINT_HEIGHT)
+        drawCtrlPoint(corner)
         userPoints.append(userPoint)
         hm.loadXY(scaleCoords(pos)) 
         
 def updateUserPoint():
     for userPoint in userPoints:
-        pg.draw.circle(WIN, DUSTYBLUE, (userPoint.x, userPoint.y), USER_POINT_HEIGHT, 3)
+        pg.draw.circle(WIN, DUSTYBLUE, (userPoint.x + (userPoint.width / 2), userPoint.y + (userPoint.height / 2)), USER_CIRCLE_RAD, 3)
     
 def drawCtrlPoint(pos): #draws the control point for tge point created when f is pushed
     if pos[1] >= ACTIVE_RANGE_Y[0] + CONTROL_SHIFT_HEIGHT: #if at top of the screen
@@ -107,24 +109,23 @@ def drawCtrlPoint(pos): #draws the control point for tge point created when f is
 def updateCtrlPoint(): #updates the control point's pos as well as draw the line between the user point and the ctrl point
     i = 0
     for ctrlPoint in ctrlPoints:
-        pg.draw.circle(WIN, PASTELBLUE, (ctrlPoint.x, ctrlPoint.y), CTRL_POINT_HEIGHT, 3) 
-        util.drawDashedLine(WIN, GRAINSBORO, (userPoints[i].x, userPoints[i].y), (ctrlPoint.x, ctrlPoint.y), 3, 3)
+        pg.draw.circle(WIN, PASTELBLUE, (ctrlPoint.x + (ctrlPoint.width / 2), ctrlPoint.y + (ctrlPoint.height / 2)), CTRL_CIRCLE_RAD, 3) 
+        util.drawDashedLine(WIN, GRAINSBORO, (userPoints[i].x + (userPoints[i].width / 2), userPoints[i].y + (userPoints[i].height / 2)), (ctrlPoint.x + (ctrlPoint.width / 2), ctrlPoint.y), 3, 3)
         i += 1
-    
-    
-    
-
+        
+        
+        
 def main():
     
     robot = pg.Rect(200, 200, ROBOT_WIDTH, ROBOT_HEIGHT)
-    
     clock = pg.time.Clock()
     run = True
+    
     while run:
         clock.tick(FPS)
         for event in pg.event.get():
-            
-            util.drag(event, ticks, userPoints, ctrlPoints)
+        
+            util.drag(event, userPoints, ctrlPoints)
             
             if event.type == pg.QUIT:
                 run = False
@@ -134,7 +135,6 @@ def main():
                     drawUserPoint() #CREATE POINT ON KEY F PRESS          
         
         drawWindow(robot)
-        ticks += 1
             
     pg.quit()
     
@@ -143,4 +143,5 @@ def main():
 
 
 if __name__ == "__main__":
+    utilns = util.utils(clicked = False)
     main()

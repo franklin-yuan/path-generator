@@ -1,6 +1,12 @@
 import pygame as pg 
 import numpy as np
 
+clicked = 0
+
+class utils:
+    def __init__(self, **kwargs):
+        self.__dict__.update(kwargs)
+    
 def runOnce(f):
     def wrapper(*args, **kwargs):
         if not wrapper.has_run:
@@ -8,6 +14,9 @@ def runOnce(f):
             return f(*args, **kwargs)
     wrapper.has_run = False
     return wrapper
+    
+def half(a):
+    return a / 2
     
 def drawDashedLine(surface, color, start_pos, end_pos, width = 1, dash_length = 10, exclude_corners = True):
     
@@ -27,8 +36,8 @@ def drawDashedLine(surface, color, start_pos, end_pos, width = 1, dash_length = 
     return [pg.draw.line(surface, color, tuple(dash_knots[n]), tuple(dash_knots[n+1]), width)
             for n in range(int(exclude_corners), dash_amount - int(exclude_corners), 2)]
 
-def drag(event, ticks, ar1 = [], ar2 = []): #ar1 and ar2 are arrays of objects that can be clicked
-
+def drag(event, ar1 = [], ar2 = []): #ar1 and ar2 are arrays of objects that can be clicked
+    global clicked
     if event.type == pg.MOUSEBUTTONDOWN:
         if event.button == 1:
             clicked = True
@@ -38,16 +47,15 @@ def drag(event, ticks, ar1 = [], ar2 = []): #ar1 and ar2 are arrays of objects t
         pass
     
     if clicked == True:
-        print("AAAAAA")
+        print("i am clicked")
         pos = pg.mouse.get_pos()
         x = pos[0]
         y = pos[1]
-        if event.button == 1:
-            for object in ar1:
-                if object.collidepoint(pos):
-                    object.x = x - (object.width / 2)
-                    object.y = y - (object.height / 2)
-            for object in ar2:
-                if object.collidepoint(pos):
-                    object.x = x - (object.width / 2)
-                    object.y = y - (object.height / 2)
+        for object in ar1:
+            if object.collidepoint(pos):
+                object.x = x - (object.width / 2)
+                object.y = y - (object.height / 2)
+        for object in ar2:
+            if object.collidepoint(pos):
+                object.x = x - (object.width / 2)
+                object.y = y - (object.height / 2)
