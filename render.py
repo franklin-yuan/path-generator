@@ -24,7 +24,7 @@ GRAINSBORO = (220, 220, 220)
 userPoints = []
 ctrlPoints = []
 
-ticks = 0
+clicked = False
 
 FPS = 60
 FIELD_WIDTH, FIELD_HEIGHT = 876, 594
@@ -118,10 +118,8 @@ def main():
     
     robot = pg.Rect(200, 200, ROBOT_WIDTH, ROBOT_HEIGHT)
     
-    clock = pg.time.Clock()
     run = True
     while run:
-        clock.tick(FPS)
         for event in pg.event.get():
             
             util.drag(event, ticks, userPoints, ctrlPoints)
@@ -134,7 +132,6 @@ def main():
                     drawUserPoint() #CREATE POINT ON KEY F PRESS          
         
         drawWindow(robot)
-        ticks += 1
             
     pg.quit()
     
