@@ -1,0 +1,2 @@
+Problems:
+  clicked not defined if mouse doesnt click and F is pressed immediately
