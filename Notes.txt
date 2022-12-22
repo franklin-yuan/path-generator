@@ -1,2 +1,2 @@
 Problems:
-  clicked not defined if mouse doesnt click and F is pressed immediately*** fixed by added else: clicked = false pass 
+  clicked not defined if mouse doesnt click and F is pressed immediately*** fixed by added else: clicked = false pass---- that was retarded, just add global clicked into main
