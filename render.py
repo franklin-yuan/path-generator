@@ -25,6 +25,7 @@ userPoints = []
 ctrlPoints = []
 
 clicked = False
+Rclicked = False
 
 FPS = 60
 FIELD_WIDTH, FIELD_HEIGHT = 876, 594
@@ -115,18 +116,17 @@ def updateCtrlPoint(): #updates the control point's pos as well as draw the line
     
 
 def main():
-    
     robot = pg.Rect(200, 200, ROBOT_WIDTH, ROBOT_HEIGHT)
-    
     run = True
     while run:
         for event in pg.event.get():
             
             util.drag(event, userPoints, ctrlPoints)
+            util.deleteAPoint(event, userPoints, ctrlPoints)
             
             if event.type == pg.QUIT:
                 run = False
-                
+            
             if event.type == pg.KEYDOWN:
                 if event.key == pg.K_f:
                     drawUserPoint() #CREATE POINT ON KEY F PRESS          
@@ -134,7 +134,7 @@ def main():
         drawWindow(robot)
             
     pg.quit()
-    
+    print(userPoints)
     print(hm.xpoints)
     print(hm.ypoints)
 
