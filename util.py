@@ -27,7 +27,7 @@ def drawDashedLine(surface, color, start_pos, end_pos, width = 1, dash_length = 
     return [pg.draw.line(surface, color, tuple(dash_knots[n]), tuple(dash_knots[n+1]), width)
             for n in range(int(exclude_corners), dash_amount - int(exclude_corners), 2)]
 
-def drag(event, ticks, ar1 = [], ar2 = []): #ar1 and ar2 are arrays of objects that can be clicked
+def drag(event, ar1, ar2): #ar1 and ar2 are arrays of objects that can be clicked
     global clicked
     pos = pg.mouse.get_pos()
     x = pos[0]
