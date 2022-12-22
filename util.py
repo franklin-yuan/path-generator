@@ -29,10 +29,11 @@ def drawDashedLine(surface, color, start_pos, end_pos, width = 1, dash_length = 
 
 def drag(event, ar1, ar2): #ar1 and ar2 are arrays of objects that can be clicked
     global clicked
-    pos = pg.mouse.get_pos()
-    x = pos[0]
-    y = pos[1]
-    
+    try:
+        clicked
+    except NameError:
+        clicked = False
+
     if event.type == pg.MOUSEBUTTONDOWN:
         if event.button == 1:
             clicked = True
@@ -40,6 +41,10 @@ def drag(event, ar1, ar2): #ar1 and ar2 are arrays of objects that can be clicke
         clicked = False
     else:
         pass
+    
+    pos = pg.mouse.get_pos()
+    x = pos[0]
+    y = pos[1]
     
     for object in ar1:
         if object.collidepoint(pos) and clicked:
@@ -49,3 +54,25 @@ def drag(event, ar1, ar2): #ar1 and ar2 are arrays of objects that can be clicke
         if object.collidepoint(pos) and clicked:
             object.x = x - (object.width / 2)
             object.y = y - (object.height / 2)
+
+def deleteAPoint(event, ar1, ar2):
+    global Rclicked
+    try:
+        Rclicked
+    except NameError:
+        Rclicked = False
+        
+    pos = pg.mouse.get_pos()
+
+    if event.type == pg.MOUSEBUTTONDOWN:
+        if event.button == 3: 
+            Rclicked = True
+    elif event.type == pg.MOUSEBUTTONUP:
+        Rclicked = False
+    else:
+        pass
+
+    for object in ar1:
+        if object.collidepoint(pos) and Rclicked:
+            ar1.remove(object)
+    #if left click and collide with point, delete that point
