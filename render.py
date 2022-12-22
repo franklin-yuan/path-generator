@@ -122,7 +122,7 @@ def main():
     while run:
         for event in pg.event.get():
             
-            util.drag(event, ticks, userPoints, ctrlPoints)
+            util.drag(event, userPoints, ctrlPoints)
             
             if event.type == pg.QUIT:
                 run = False
