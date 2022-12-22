@@ -1,7 +1,7 @@
 import pygame as pg 
 import numpy as np
 
-clicked = 0
+clicked = False
 
 class utils:
     def __init__(self, **kwargs):
@@ -15,7 +15,7 @@ def runOnce(f):
     wrapper.has_run = False
     return wrapper
     
-def half(a):
+def half(a): 
     return a / 2
     
 def drawDashedLine(surface, color, start_pos, end_pos, width = 1, dash_length = 10, exclude_corners = True):
@@ -47,7 +47,6 @@ def drag(event, ar1 = [], ar2 = []): #ar1 and ar2 are arrays of objects that can
         pass
     
     if clicked == True:
-        print("i am clicked")
         pos = pg.mouse.get_pos()
         x = pos[0]
         y = pos[1]
@@ -59,3 +58,4 @@ def drag(event, ar1 = [], ar2 = []): #ar1 and ar2 are arrays of objects that can
             if object.collidepoint(pos):
                 object.x = x - (object.width / 2)
                 object.y = y - (object.height / 2)
+

@@ -1,5 +1,5 @@
 import numpy as np
-import matplotlib as plt
+import matplotlib.pyplot as plt
 
 v = 0.0 #tangential vel
 omega = 0.0 #angular vel
@@ -25,6 +25,10 @@ class point:
 def loadXY(pos): #loads the x and y coordinates into respective arrays (pos is a tuple, pygame format)
     xpoints.append(pos[0])
     ypoints.append(pos[1])
+    
+def loadCtrl(pos):
+    cxpoints.append(pos[0])
+    cypoints.append(pos[0])
 
 def findX(point1,point2,t): #given 2 points, generate x values for the spline along the two points
     a1 = (2 * point1.x) + (-2 * point2.x) + (point1.cx) + (point2.cx)
@@ -67,5 +71,12 @@ def drawMPL(): #draw matplotlib spline
     plt.plot(cxpoints,cypoints, 'm.', markersize = 6.0)
     plt.xlabel('x')
     plt.ylabel('y')
+    
+    print("                    ")
+    print(xpoints)
+    print(ypoints)
+    print(cxpoints)
+    print(cypoints)
+    
         
     plt.show()
