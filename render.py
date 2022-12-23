@@ -84,10 +84,6 @@ def scaleCoords(pos): #scales coordinates selected to 10 x 10
     
     return (x,y)
 
-def turnToVector(pos, pos1): #BROKEN
-    newPos = (pos[0] - pos1[0], pos[1] - pos1[1])
-    return newPos
-
 def drawUserPoint(): #draws the user point when f is pushed
     pos = getMousePos()
     corner = (pos[0] - (USER_POINT_WIDTH / 2), pos[1] - (USER_POINT_HEIGHT / 2))
@@ -152,7 +148,7 @@ def parseAllCoords():
     print(ctrlPoses[0])
     print(userPoses[0])
     
-    for i in range(len(ctrlPoses)): ctrlPoses[i] = turnToVector(ctrlPoses[i], userPoses[i])
+    for i in range(len(ctrlPoses)): ctrlPoses[i] = util.turnToVector(ctrlPoses[i], userPoses[i])
     
     print(ctrlPoses[0])
     print(userPoses[0])
@@ -173,6 +169,7 @@ def main():
         for event in pg.event.get():
         
             util.drag(event, userPoints, ctrlPoints)
+            util.delPoint(event, userPoints, ctrlPoints)
             
             if event.type == pg.QUIT:
                 run = False
