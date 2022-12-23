@@ -2,6 +2,7 @@ import pygame as pg
 import numpy as np
 
 clicked = False
+objClicked = False
 
 class utils:
     def __init__(self, **kwargs):
@@ -17,6 +18,10 @@ def runOnce(f):
     
 def half(a): 
     return a / 2
+
+def getMousePos(): #gets coordinates of mouse pointer
+    pos = pg.mouse.get_pos()
+    return pos
 
 def arToPos(Xar, Yar): #turns arrays (x and y) into array of poses
     poses = []
@@ -48,7 +53,7 @@ def drawDashedLine(surface, color, start_pos, end_pos, width = 1, dash_length = 
             for n in range(int(exclude_corners), dash_amount - int(exclude_corners), 2)]
 
 def drag(event, ar1 = [], ar2 = []): #ar1 and ar2 are arrays of objects that can be clicked
-    global clicked
+    global clicked, objClicked
     if event.type == pg.MOUSEBUTTONDOWN:
         if event.button == 1:
             clicked = True
@@ -63,12 +68,13 @@ def drag(event, ar1 = [], ar2 = []): #ar1 and ar2 are arrays of objects that can
             if object.collidepoint(pos):
                 object.x = x - (object.width / 2)
                 object.y = y - (object.height / 2)
-        for object in ar2:
-            if object.collidepoint(pos):
-                object.x = x - (object.width / 2)
-                object.y = y - (object.height / 2)
+            for object in ar2:
+                if object.collidepoint(pos):
+                    object.x = x - (object.width / 2)
+                    object.y = y - (object.height / 2)
+            
                 
-def delPoint(event, ar1, ar2):
+def delPoint(event, ar1, ar2): #ar1 and ar2 are arrays of objects that can be clicked
     if event.type == pg.MOUSEBUTTONDOWN:
         pos = pg.mouse.get_pos()
         if event.button == 3:
