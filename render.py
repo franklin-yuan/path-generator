@@ -84,7 +84,7 @@ def scaleCoords(pos): #scales coordinates selected to 10 x 10
     
     return (x,y)
 
-def turnToVector(pos, pos1):
+def turnToVector(pos, pos1): #BROKEN
     newPos = (pos[0] - pos1[0], pos[1] - pos1[1])
     return newPos
 
@@ -95,7 +95,6 @@ def drawUserPoint(): #draws the user point when f is pushed
         userPoint = pg.Rect(corner[0], corner[1], USER_POINT_WIDTH, USER_POINT_HEIGHT)
         drawCtrlPoint(corner, pos)
         userPoints.append(userPoint)
-        hm.loadXY(scaleCoords(pos)) 
         
 def updateUserPoint():
     for userPoint in userPoints:
@@ -112,8 +111,7 @@ def drawCtrlPoint(pos, pos1): #draws the control point for tge point created whe
     
     ctrlPoint = pg.Rect(newPos[0], newPos[1], CTRL_POINT_WIDTH, CTRL_POINT_HEIGHT)
     ctrlPoints.append(ctrlPoint)
-    hm.loadCtrl(scaleCoords(turnToVector(newPos, pos1)))
-
+    
 def updateCtrlPoint(): #updates the control point's pos as well as draw the line between the user point and the ctrl point
     i = 0
     for ctrlPoint in ctrlPoints:
@@ -122,7 +120,45 @@ def updateCtrlPoint(): #updates the control point's pos as well as draw the line
         util.drawDashedLine(WIN, GRAINSBORO, (userPoints[i].x + (userPoints[i].width / 2), userPoints[i].y + (userPoints[i].height / 2)), (ctrlPoint.x + (ctrlPoint.width / 2), ctrlPoint.y + (ctrlPoint.height / 2)), 3, 3)
         i += 1
 
-def parseAllCoords:
+def parseAllCoords():
+    cornerUX = [] #coords of the corner of target points
+    cornerUY = []
+    cornerCX = [] #coords of the corner of the control points
+    cornerCY = []
+    adjUX = [] #adjusted coords of target points
+    adjUY = []
+    adjCX = [] #adjusted coords of control points
+    adjCY = []
+    
+    for userPoint in userPoints:
+        cornerUX.append(userPoint.x)
+        cornerUY.append(userPoint.y)
+    
+    for ctrlPoint in ctrlPoints:
+        cornerCX.append(ctrlPoint.x)
+        cornerCY.append(ctrlPoint.y)
+    
+    for x in cornerUX: adjUX.append(x + (USER_POINT_WIDTH / 2))
+    for y in cornerUY: adjUY.append(y + (USER_POINT_HEIGHT / 2))
+    for x in cornerCX: adjCX.append(x + (CTRL_POINT_WIDTH / 2))
+    for y in cornerCY: adjCY.append(y + (CTRL_POINT_HEIGHT / 2))
+    
+    userPoses = util.arToPos(adjUX, adjUY)
+    ctrlPoses = util.arToPos(adjCX, adjCY)
+    
+    for i in range(len(userPoses)): userPoses[i] = scaleCoords(userPoses[i]) 
+    for i in range(len(ctrlPoses)): ctrlPoses[i] = scaleCoords(ctrlPoses[i])
+    
+    print(ctrlPoses[0])
+    print(userPoses[0])
+    
+    for i in range(len(ctrlPoses)): ctrlPoses[i] = turnToVector(ctrlPoses[i], userPoses[i])
+    
+    print(ctrlPoses[0])
+    print(userPoses[0])
+    
+    hm.loadUserPos(userPoses)
+    hm.loadCtrlPos(ctrlPoses)
     #run this at the end to loop thorugh all points and control points, currently the thing is being fed only where they pressed k, not the final pos
         
         
@@ -148,6 +184,8 @@ def main():
         drawWindow(robot)
             
     pg.quit()
+    
+    parseAllCoords()
     
     hm.drawMPL()
     

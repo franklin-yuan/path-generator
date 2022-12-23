@@ -22,13 +22,11 @@ class point:
     end = False
     
 #----------------------------------------------------- ALL SPLINE FUNCS
-def loadXY(pos): #loads the x and y coordinates into respective arrays (pos is a tuple, pygame format)
-    xpoints.append(pos[0])
-    ypoints.append(pos[1])
+def loadUserPos(poses): #loads the x and y coordinates into respective arrays (pos is a tuple, pygame format)
+    for pos in poses: xpoints.append(pos[0]); ypoints.append(pos[1])
     
-def loadCtrl(pos):
-    cxpoints.append(pos[0])
-    cypoints.append(pos[0])
+def loadCtrlPos(poses):
+    for pos in poses: cxpoints.append(pos[0]); cypoints.append(pos[1])
 
 def findX(point1,point2,t): #given 2 points, generate x values for the spline along the two points
     a1 = (2 * point1.x) + (-2 * point2.x) + (point1.cx) + (point2.cx)
@@ -63,8 +61,8 @@ def drawMPL(): #draw matplotlib spline
         point2.cy = cypoints[i+1]
         xar = findX(point1, point2, t)
         yar = findY(point1, point2, t)
-        for j in range(len(xar)):
-            print("[",xar[j],yar[j],end="]")
+        # for j in range(len(xar)):
+        #     print("[",xar[j],yar[j],end="]")
         plt.plot(xar,yar,'k',linewidth=2.0)
     
     plt.plot(xpoints,ypoints, 'b.', markersize = 10.0)
@@ -72,7 +70,7 @@ def drawMPL(): #draw matplotlib spline
     plt.xlabel('x')
     plt.ylabel('y')
     
-    print("                    ")
+    print("\n\n\n\n")
     print(xpoints)
     print(ypoints)
     print(cxpoints)

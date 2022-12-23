@@ -17,7 +17,14 @@ def runOnce(f):
     
 def half(a): 
     return a / 2
+
+def arToPos(Xar, Yar): #turns arrays (x and y) into array of poses
+    poses = []
+    for i in range(len(Xar)):
+        poses.append((Xar[i], Yar[i])) 
     
+    return poses   
+
 def drawDashedLine(surface, color, start_pos, end_pos, width = 1, dash_length = 10, exclude_corners = True):
     
     # convert tuples to numpy arrays
