@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import util
 
+#----------------------------------------------------- ALL SPLINE GLOBALS
 v = 0.0 #tangential vel
 omega = 0.0 #angular vel
 
@@ -15,6 +16,7 @@ xar = []
 yar = []
 t = 0.0
 
+#----------------------------------------------------- ALL SPLINE CLASSES
 class point:
     x = 0.0
     y = 0.0
@@ -115,5 +117,13 @@ def calcPts(res):
         newPoses = util.arToPos(xar[i], yar[i])
         for pos in newPoses:
             returnPoses.append(pos)
+            
     clearAll()
     return returnPoses
+
+def writeToTxt():
+    txt = open('paths/path.txt', 'w')
+    for pos in calcPts(50):
+        entry = str(pos[0]) + " " + str(pos[1]) + "\n"
+        txt.write(entry)
+    txt.close()

@@ -206,7 +206,9 @@ def updateSpline(poses):#this needes to be in real time
     
     # for pos in newPoses:
     #     pg.draw.circle(WIN, GREEN, pos, 1, 0)
-        
+
+
+#----------------------------------------------------- MAIN
 def main():
     robot = pg.Rect(200, 200, ROBOT_WIDTH, ROBOT_HEIGHT)
     clock = pg.time.Clock()
@@ -237,6 +239,7 @@ def main():
     hm.clearAll()
     parseAllCoords()
     hm.drawMPL(SPLINE_RESOLUTION_MPL)
+    hm.writeToTxt()
     
 if __name__ == "__main__":
     main()

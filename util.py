@@ -1,9 +1,11 @@
 import pygame as pg 
 import numpy as np
 
+#----------------------------------------------------- ALL UTIL GLOBALS
 clicked = False
 objClicked = False
 
+#----------------------------------------------------- ALL UTIL CLASSES
 class utils:
     def __init__(self, **kwargs):
         self.__dict__.update(kwargs)
