@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import util
 
 v = 0.0 #tangential vel
 omega = 0.0 #angular vel
@@ -22,6 +23,21 @@ class point:
     end = False
     
 #----------------------------------------------------- ALL SPLINE FUNCS
+def clearAll():
+    global v, omega, xpoints, ypoints, cxpoints, cypoints, xar, yar, t
+    v = 0.0 #tangential vel
+    omega = 0.0 #angular vel
+
+    #array of points
+    xpoints = []
+    ypoints = []
+    cxpoints = []
+    cypoints = []
+
+    xar = []
+    yar = []
+    t = 0.0
+
 def loadUserPos(poses): #loads the x and y coordinates into respective arrays (pos is a tuple, pygame format)
     for pos in poses: xpoints.append(pos[0]); ypoints.append(pos[1])
     
@@ -43,6 +59,11 @@ def findY(point1,point2,t): #given 2 points, generate x values for the spline al
     
     return a2*(t**3) + b2*(t**2) + c2*(t) + d2
 
+def shiftCtrlPoints(): #only for visual stuff. Adds the ctrl vector to it's related point for a better visualisation.
+    for i in range(len(cxpoints)):
+        cxpoints[i] = xpoints[i] + cxpoints[i]
+        cypoints[i] = ypoints[i] + cypoints[i]
+
 def drawMPL(): #draw matplotlib spline
     plt.figure(figsize=(10, 10))
     point1 = point()
@@ -50,7 +71,7 @@ def drawMPL(): #draw matplotlib spline
     
     for i in range(len(xpoints)-1):
         
-        t = np.linspace(0,1,num=100)
+        t = np.linspace(0,1,num=25)
         point1.x = xpoints[i]
         point2.x = xpoints[i+1]
         point1.y = ypoints[i]
@@ -69,12 +90,30 @@ def drawMPL(): #draw matplotlib spline
     plt.plot(cxpoints,cypoints, 'm.', markersize = 6.0)
     plt.xlabel('x')
     plt.ylabel('y')
-    
-    print("\n\n\n\n")
-    print(xpoints)
-    print(ypoints)
-    print(cxpoints)
-    print(cypoints)
-    
-        
     plt.show()
+
+def calcPts():
+    newPoses = []
+    returnPoses = []
+    point1 = point()
+    point2 = point()
+    for i in range(len(xpoints)-1):
+        t = np.linspace(0,1,num=50)
+        point1.x = xpoints[i]
+        point2.x = xpoints[i+1]
+        point1.y = ypoints[i]
+        point2.y = ypoints[i+1]
+        point1.cx = cxpoints[i]
+        point2.cx = cxpoints[i+1]
+        point1.cy = cypoints[i]
+        point2.cy = cypoints[i+1]
+        xar.append(findX(point1, point2, t))
+        yar.append(findY(point1, point2, t))
+    # print("\n\n\n\n\n hhHhHh")
+    
+    for i in range(len(xar)):
+        newPoses = util.arToPos(xar[i], yar[i])
+        for pos in newPoses:
+            returnPoses.append(pos)
+    clearAll()
+    return returnPoses

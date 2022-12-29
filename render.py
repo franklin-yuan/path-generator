@@ -23,11 +23,13 @@ GRAINSBORO = (220, 220, 220)
 
 userPoints = []
 ctrlPoints = []
+update = False
 
 FPS = 144
 
 FIELD_WIDTH, FIELD_HEIGHT = 876, 594
 ROBOT_WIDTH, ROBOT_HEIGHT = 60, 60
+PATH_DOT_WIDTH, PATH_DOT_HEIGHT = 2, 2
 USER_POINT_WIDTH, USER_POINT_HEIGHT = 22, 22
 CTRL_POINT_WIDTH, CTRL_POINT_HEIGHT = 16, 16
 USER_CIRCLE_RAD = (USER_POINT_WIDTH - 2) / 2 
@@ -46,12 +48,15 @@ FIELD_IMAGE = pg.image.load(os.path.join('assets','vex_field.png'))
 FIELD_IMAGE = pg.transform.scale(FIELD_IMAGE, (FIELD_WIDTH, FIELD_HEIGHT))
 ROBOT_IMAGE = pg.image.load(os.path.join('assets','robot_square.png'))
 ROBOT_IMAGE = pg.transform.scale(ROBOT_IMAGE, (ROBOT_WIDTH, ROBOT_HEIGHT))
+PATH_DOT_IMAGE = pg.image.load(os.path.join('assets','spline_path_dot.png'))
+PATH_DOT_IMAGE = pg.transform.scale(PATH_DOT_IMAGE, (PATH_DOT_WIDTH, PATH_DOT_HEIGHT))
 
 INSTRUC_FONT = pg.font.SysFont('arial', 20)
 
 SCALING_CONST = 10 #Arbitrary units for how tall / wide the field should be
 CONTROL_SHIFT_HEIGHT = (1 / SCALING_CONST) * ACTIVE_RANGE_Y_N
 
+CTRL_VEC_SCALING_CONST = 2
 
 #----------------------------------------------------- ALL GUI FUNCS
 def drawWindow(robot):
@@ -61,6 +66,10 @@ def drawWindow(robot):
     updateUserPoint()
     updateCtrlPoint()
     
+    if len(userPoints) >= 2:
+        parseAllCoords()
+        updateSpline(hm.calcPts())
+        
     pg.display.update()
     
 def renderText():
@@ -84,6 +93,17 @@ def scaleCoords(pos): #scales coordinates selected to 10 x 10
     
     return (x,y)
 
+def unscaleCoords(pos):
+    # print("i run")
+    x = pos[0]
+    y = pos[1]
+    x /= SCALING_CONST; x *= ACTIVE_RANGE_X_N; x += ACTIVE_RANGE_X[0]
+    y = SCALING_CONST - y
+    y /= SCALING_CONST; y *= ACTIVE_RANGE_Y_N; y += ACTIVE_RANGE_Y[0]
+    # print(x,y)
+    
+    return (x,y)
+    
 def drawUserPoint(): #draws the user point when f is pushed
     pos = getMousePos()
     corner = (pos[0] - (USER_POINT_WIDTH / 2), pos[1] - (USER_POINT_HEIGHT / 2))
@@ -145,25 +165,36 @@ def parseAllCoords():
     for i in range(len(userPoses)): userPoses[i] = scaleCoords(userPoses[i]) 
     for i in range(len(ctrlPoses)): ctrlPoses[i] = scaleCoords(ctrlPoses[i])
     
-    print(ctrlPoses[0])
-    print(userPoses[0])
+    # print(ctrlPoses[0])
+    # print(userPoses[0])
     
-    for i in range(len(ctrlPoses)): ctrlPoses[i] = util.turnToVector(ctrlPoses[i], userPoses[i])
+    for i in range(len(ctrlPoses)): ctrlPoses[i] = util.turnToVector(ctrlPoses[i], userPoses[i]); util.scalePos(ctrlPoses[i], CTRL_VEC_SCALING_CONST)
     
-    print(ctrlPoses[0])
-    print(userPoses[0])
+    # print(ctrlPoses[0])
+    # print(userPoses[0])
     
     hm.loadUserPos(userPoses)
     hm.loadCtrlPos(ctrlPoses)
     #run this at the end to loop thorugh all points and control points, currently the thing is being fed only where they pressed k, not the final pos
         
+def updateSpline(poses):#this needes to be in real time
+    newPoses = [] #unscaled stuff
+    for pos in poses:
+        newPos = unscaleCoords(pos)
+        newPoses.append(newPos)
+    
+    for i in range(len(newPoses) - 1):
+        # print(poses[i], poses[i+1])
+        pg.draw.line(WIN, GREEN, newPoses[i], newPoses[i+1], 2)
+    
+    
+    # for pos in newPoses:
+    #     pg.draw.circle(WIN, GREEN, pos, 1, 0)
         
 def main():
-    
     robot = pg.Rect(200, 200, ROBOT_WIDTH, ROBOT_HEIGHT)
     clock = pg.time.Clock()
     run = True
-    
     while run:
         clock.tick(FPS)
         for event in pg.event.get():
@@ -176,14 +207,19 @@ def main():
                 
             if event.type == pg.KEYDOWN:
                 if event.key == pg.K_f:
-                    drawUserPoint() #CREATE POINT ON KEY F PRESS          
+                    drawUserPoint() #CREATE POINT ON KEY F PRESS      
+                    
+            if event.type == pg.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    update = True    
+                elif event.type == pg.MOUSEBUTTONUP:
+                    update = False
         
         drawWindow(robot)
             
     pg.quit()
-    
+    hm.clearAll()
     parseAllCoords()
-    
     hm.drawMPL()
     
 if __name__ == "__main__":

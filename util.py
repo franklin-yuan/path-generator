@@ -30,9 +30,15 @@ def arToPos(Xar, Yar): #turns arrays (x and y) into array of poses
     
     return poses   
 
+def scalePos(pos, scaleVal):
+    return (pos[0] * scaleVal, pos[1] * scaleVal)
+
 def turnToVector(pos, pos1): 
     newPos = (pos[0] - pos1[0], pos[1] - pos1[1])
     return newPos
+
+def addVector(pos, vec):
+    return (pos[0] + vec[0], pos[1] + vec[1]) 
 
 def drawDashedLine(surface, color, start_pos, end_pos, width = 1, dash_length = 10, exclude_corners = True):
     
@@ -68,10 +74,10 @@ def drag(event, ar1 = [], ar2 = []): #ar1 and ar2 are arrays of objects that can
             if object.collidepoint(pos):
                 object.x = x - (object.width / 2)
                 object.y = y - (object.height / 2)
-            for object in ar2:
-                if object.collidepoint(pos):
-                    object.x = x - (object.width / 2)
-                    object.y = y - (object.height / 2)
+        for object in ar2:
+            if object.collidepoint(pos):
+                object.x = x - (object.width / 2)
+                object.y = y - (object.height / 2)
             
                 
 def delPoint(event, ar1, ar2): #ar1 and ar2 are arrays of objects that can be clicked
