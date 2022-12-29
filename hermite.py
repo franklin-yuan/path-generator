@@ -64,14 +64,14 @@ def shiftCtrlPoints(): #only for visual stuff. Adds the ctrl vector to it's rela
         cxpoints[i] = xpoints[i] + cxpoints[i]
         cypoints[i] = ypoints[i] + cypoints[i]
 
-def drawMPL(): #draw matplotlib spline
+def drawMPL(res): #draw matplotlib spline
     plt.figure(figsize=(10, 10))
     point1 = point()
     point2 = point()
     
     for i in range(len(xpoints)-1):
         
-        t = np.linspace(0,1,num=25)
+        t = np.linspace(0,1,num=res)
         point1.x = xpoints[i]
         point2.x = xpoints[i+1]
         point1.y = ypoints[i]
@@ -92,13 +92,13 @@ def drawMPL(): #draw matplotlib spline
     plt.ylabel('y')
     plt.show()
 
-def calcPts():
+def calcPts(res):
     newPoses = []
     returnPoses = []
     point1 = point()
     point2 = point()
     for i in range(len(xpoints)-1):
-        t = np.linspace(0,1,num=50)
+        t = np.linspace(0,1,num=res)
         point1.x = xpoints[i]
         point2.x = xpoints[i+1]
         point1.y = ypoints[i]

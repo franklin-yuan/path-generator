@@ -56,7 +56,7 @@ def drawDashedLine(surface, color, start_pos, end_pos, width = 1, dash_length = 
     dash_knots = np.array([np.linspace(start_pos[i], end_pos[i], dash_amount) for i in range(2)]).transpose()
 
     return [pg.draw.line(surface, color, tuple(dash_knots[n]), tuple(dash_knots[n+1]), width)
-            for n in range(int(exclude_corners), dash_amount - int(exclude_corners), 2)]
+            for n in range(int(exclude_corners), dash_amount - int(exclude_corners), 2)]    
 
 def drag(event, ar1 = [], ar2 = []): #ar1 and ar2 are arrays of objects that can be clicked
     global clicked, objClicked
