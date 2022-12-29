@@ -10,13 +10,14 @@ WIDTH, HEIGHT = 876, 900
 WIN = pg.display.set_mode((WIDTH, HEIGHT))
 pg.display.set_caption("Spline Tool")
 
-BLACK      = (   0,   0,   0)
-WHITE      = ( 255, 255, 255)
+BLACK      = (  0,   0,   0)
+WHITE      = (255, 255, 255)
 BLUE       = (  0,   0, 255)
 GREEN      = (  0, 255,   0)
 RED        = (255,   0,   0)
 DUSTYBLUE  = (136, 155, 174)
 PASTELBLUE = (174, 198, 207)
+DARKBLUE   = ( 25,  69, 105)
 PASTELRED  = (255, 105,  97)
 GRAY       = (100, 100, 100)
 GRAINSBORO = (220, 220, 220)
@@ -56,7 +57,14 @@ INSTRUC_FONT = pg.font.SysFont('arial', 20)
 SCALING_CONST = 10 #Arbitrary units for how tall / wide the field should be
 CONTROL_SHIFT_HEIGHT = (1 / SCALING_CONST) * ACTIVE_RANGE_Y_N
 
-CTRL_VEC_SCALING_CONST = 2
+CTRL_VEC_SCALING_CONST = 4
+
+
+
+TARGET_POINT_CLR = DUSTYBLUE
+CTRL_POINT_CLR = PASTELBLUE
+TARGET_TO_CTRL_LINE_CLR = GRAINSBORO
+SPLINE_LINE_CLR = DARKBLUE
 
 #----------------------------------------------------- ALL GUI FUNCS
 def drawWindow(robot):
@@ -114,8 +122,8 @@ def drawUserPoint(): #draws the user point when f is pushed
         
 def updateUserPoint():
     for userPoint in userPoints:
-        pg.draw.circle(WIN, DUSTYBLUE, (userPoint.x + (userPoint.width / 2), userPoint.y + (userPoint.height / 2)), USER_CIRCLE_RAD, 3)
-        pg.draw.circle(WIN, DUSTYBLUE, (userPoint.x + (userPoint.width / 2), userPoint.y + (userPoint.height / 2)), CENTER_CIRCLE_RAD, 1)
+        pg.draw.circle(WIN, TARGET_POINT_CLR, (userPoint.x + (userPoint.width / 2), userPoint.y + (userPoint.height / 2)), USER_CIRCLE_RAD, 3)
+        pg.draw.circle(WIN, TARGET_POINT_CLR, (userPoint.x + (userPoint.width / 2), userPoint.y + (userPoint.height / 2)), CENTER_CIRCLE_RAD, 1)
         
 def drawCtrlPoint(pos, pos1): #draws the control point for tge point created when f is pushed #pos is corner, pos1 is actual
     if pos[1] >= ACTIVE_RANGE_Y[0] + CONTROL_SHIFT_HEIGHT: #if at top of the screen
@@ -131,9 +139,9 @@ def drawCtrlPoint(pos, pos1): #draws the control point for tge point created whe
 def updateCtrlPoint(): #updates the control point's pos as well as draw the line between the user point and the ctrl point
     i = 0
     for ctrlPoint in ctrlPoints:
-        pg.draw.circle(WIN, PASTELBLUE, (ctrlPoint.x + (ctrlPoint.width / 2), ctrlPoint.y + (ctrlPoint.height / 2)), CTRL_CIRCLE_RAD, 3) 
-        pg.draw.circle(WIN, PASTELBLUE, (ctrlPoint.x + (ctrlPoint.width / 2), ctrlPoint.y + (ctrlPoint.height / 2)), CENTER_CIRCLE_RAD, 1) 
-        util.drawDashedLine(WIN, GRAINSBORO, (userPoints[i].x + (userPoints[i].width / 2), userPoints[i].y + (userPoints[i].height / 2)), (ctrlPoint.x + (ctrlPoint.width / 2), ctrlPoint.y + (ctrlPoint.height / 2)), 3, 3)
+        pg.draw.circle(WIN, CTRL_POINT_CLR, (ctrlPoint.x + (ctrlPoint.width / 2), ctrlPoint.y + (ctrlPoint.height / 2)), CTRL_CIRCLE_RAD, 3) 
+        pg.draw.circle(WIN, CTRL_POINT_CLR, (ctrlPoint.x + (ctrlPoint.width / 2), ctrlPoint.y + (ctrlPoint.height / 2)), CENTER_CIRCLE_RAD, 1) 
+        util.drawDashedLine(WIN, TARGET_TO_CTRL_LINE_CLR, (userPoints[i].x + (userPoints[i].width / 2), userPoints[i].y + (userPoints[i].height / 2)), (ctrlPoint.x + (ctrlPoint.width / 2), ctrlPoint.y + (ctrlPoint.height / 2)), 3, 3)
         i += 1
 
 def parseAllCoords():
@@ -168,7 +176,7 @@ def parseAllCoords():
     # print(ctrlPoses[0])
     # print(userPoses[0])
     
-    for i in range(len(ctrlPoses)): ctrlPoses[i] = util.turnToVector(ctrlPoses[i], userPoses[i]); util.scalePos(ctrlPoses[i], CTRL_VEC_SCALING_CONST)
+    for i in range(len(ctrlPoses)): ctrlPoses[i] = util.turnToVector(ctrlPoses[i], userPoses[i]); ctrlPoses[i] = util.scalePos(ctrlPoses[i], CTRL_VEC_SCALING_CONST)
     
     # print(ctrlPoses[0])
     # print(userPoses[0])
@@ -185,7 +193,7 @@ def updateSpline(poses):#this needes to be in real time
     
     for i in range(len(newPoses) - 1):
         # print(poses[i], poses[i+1])
-        pg.draw.line(WIN, GREEN, newPoses[i], newPoses[i+1], 2)
+        pg.draw.line(WIN, SPLINE_LINE_CLR, newPoses[i], newPoses[i+1], 2)
     
     
     # for pos in newPoses:
