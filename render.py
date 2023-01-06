@@ -65,6 +65,7 @@ SPLINE_RESOLUTION_MPL = 25 #this one is for the graph that pops up
 
 TARGET_POINT_CLR = DUSTYBLUE
 CTRL_POINT_CLR = PASTELBLUE
+END_POINT_CLR = PASTELRED
 TARGET_TO_CTRL_LINE_CLR = GRAINSBORO
 SPLINE_LINE_CLR = DARKBLUE
 
@@ -75,11 +76,11 @@ def drawWindow(robot):
     renderText()
     updateUserPoint()
     updateCtrlPoint()
+    updateEndPoint()
     
-    if len(segments[currentSegment].userPoints) >= 2:
-        parseAllCoords()
-        for i in range(len(segments)):
-            updateSpline(segments[i].calcPts(SPLINE_RESOLUTION_WIN))
+    for i in range(len(segments)):
+        parseAllCoords(segments[i])
+        updateSpline(segments[i].calcPts(SPLINE_RESOLUTION_WIN))
         
     pg.display.update()
     
@@ -127,10 +128,17 @@ def drawUserPoint(): #draws the user point when f is pushed
     if inRangeOfField(pos) == True: #check if mouse pointer is within the field image
         userPoint = pg.Rect(corner[0], corner[1], USER_POINT_WIDTH, USER_POINT_HEIGHT)
         drawCtrlPoint(corner, pos)
-        segments[currentSegment].userPoints.append(userPoint)
+        print(currentSegment)
+        segments[-1].userPoints.append(userPoint)
         
-def updateUserPoint():
-    for userPoint in collateSegPoints("user"):
+        for i in range(len(segments)):
+            print(segments[i].userPoints)
+        
+def updateUserPoint(): 
+    ar = collateSegPoints("user")
+    if segments[-1].concluded == False: pass
+    elif segments[-1].concluded == True: ar.pop(len(ar))
+    for userPoint in ar:
         pg.draw.circle(WIN, TARGET_POINT_CLR, (userPoint.x + (userPoint.width / 2), userPoint.y + (userPoint.height / 2)), USER_CIRCLE_RAD, 3)
         pg.draw.circle(WIN, TARGET_POINT_CLR, (userPoint.x + (userPoint.width / 2), userPoint.y + (userPoint.height / 2)), CENTER_CIRCLE_RAD, 1)
         
@@ -143,7 +151,7 @@ def drawCtrlPoint(pos, pos1): #draws the control point for tge point created whe
         top = False
     
     ctrlPoint = pg.Rect(newPos[0], newPos[1], CTRL_POINT_WIDTH, CTRL_POINT_HEIGHT)
-    segments[currentSegment].ctrlPoints.append(ctrlPoint)
+    segments[-1].ctrlPoints.append(ctrlPoint)
     
 def updateCtrlPoint(): #updates the control point's pos as well as draw the line between the user point and the ctrl point
     i = 0
@@ -155,10 +163,27 @@ def updateCtrlPoint(): #updates the control point's pos as well as draw the line
 
 def drawEndPoint():
     global currentSegment
-    currentSegment += 1
-    segments.append(hm.segment())
+    print('ololo')
+    pos = getMousePos()
+    corner = (pos[0] - (USER_POINT_WIDTH / 2), pos[1] - (USER_POINT_HEIGHT / 2))
+    if inRangeOfField(pos) == True: #check if mouse pointer is within the field image
+        endPoint = pg.Rect(corner[0], corner[1], USER_POINT_WIDTH, USER_POINT_HEIGHT)
+        drawCtrlPoint(corner, pos)
+        segments[-1].userPoints.append(endPoint)
+        segments[-1].concluded = True
+        createNewSegment()
+        segments[-1].userPoints.append(endPoint)
+        # print(segments[currentSegment].userPoints)
+        drawCtrlPoint(corner, pos)
+    
+def updateEndPoint():
+    ar = collateSegPoints("user")
+    if segments[-1].concluded == True:
+        userPoint = ar[-1]
+        pg.draw.circle(WIN, END_POINT_CLR, (userPoint.x + (userPoint.width / 2), userPoint.y + (userPoint.height / 2)), USER_CIRCLE_RAD, 3)
+        pg.draw.circle(WIN, END_POINT_CLR, (userPoint.x + (userPoint.width / 2), userPoint.y + (userPoint.height / 2)), CENTER_CIRCLE_RAD, 1)
 
-def parseAllCoords():
+def parseAllCoords(seg):
     cornerUX = [] #coords of the corner of target points
     cornerUY = []
     cornerCX = [] #coords of the corner of the control points
@@ -168,37 +193,67 @@ def parseAllCoords():
     adjCX = [] #adjusted coords of control points
     adjCY = []
     
-    for j in range(len(segments)):
+    # for j in range(len(segments)):
     
-        for userPoint in segments[j].userPoints:
-            cornerUX.append(userPoint.x)
-            cornerUY.append(userPoint.y)
+    #     for userPoint in segments[j].userPoints:
+    #         cornerUX.append(userPoint.x)
+    #         cornerUY.append(userPoint.y)
         
-        for ctrlPoint in segments[j].ctrlPoints:
-            cornerCX.append(ctrlPoint.x)
-            cornerCY.append(ctrlPoint.y)
+    #     for ctrlPoint in segments[j].ctrlPoints:
+    #         cornerCX.append(ctrlPoint.x)
+    #         cornerCY.append(ctrlPoint.y)
         
-        for x in cornerUX: adjUX.append(x + (USER_POINT_WIDTH / 2))
-        for y in cornerUY: adjUY.append(y + (USER_POINT_HEIGHT / 2))
-        for x in cornerCX: adjCX.append(x + (CTRL_POINT_WIDTH / 2))
-        for y in cornerCY: adjCY.append(y + (CTRL_POINT_HEIGHT / 2))
+    #     for x in cornerUX: adjUX.append(x + (USER_POINT_WIDTH / 2))
+    #     for y in cornerUY: adjUY.append(y + (USER_POINT_HEIGHT / 2))
+    #     for x in cornerCX: adjCX.append(x + (CTRL_POINT_WIDTH / 2))
+    #     for y in cornerCY: adjCY.append(y + (CTRL_POINT_HEIGHT / 2))
         
-        userPoses = util.arToPos(adjUX, adjUY)
-        ctrlPoses = util.arToPos(adjCX, adjCY)
+    #     userPoses = util.arToPos(adjUX, adjUY)
+    #     ctrlPoses = util.arToPos(adjCX, adjCY)
         
-        for i in range(len(userPoses)): userPoses[i] = scaleCoords(userPoses[i]) 
-        for i in range(len(ctrlPoses)): ctrlPoses[i] = scaleCoords(ctrlPoses[i])
+    #     for i in range(len(userPoses)): userPoses[i] = scaleCoords(userPoses[i]) 
+    #     for i in range(len(ctrlPoses)): ctrlPoses[i] = scaleCoords(ctrlPoses[i])
         
-        # print(ctrlPoses[0])
-        # print(userPoses[0])
+    #     # print(ctrlPoses[0])
+    #     # print(userPoses[0])
         
-        for i in range(len(ctrlPoses)): ctrlPoses[i] = util.turnToVector(ctrlPoses[i], userPoses[i]); ctrlPoses[i] = util.scalePos(ctrlPoses[i], CTRL_VEC_SCALING_CONST)
+    #     for i in range(len(ctrlPoses)): ctrlPoses[i] = util.turnToVector(ctrlPoses[i], userPoses[i]); ctrlPoses[i] = util.scalePos(ctrlPoses[i], CTRL_VEC_SCALING_CONST)
         
-        # print(ctrlPoses[0])
-        # print(userPoses[0])
+    #     # print(ctrlPoses[0])
+    #     # print(userPoses[0])
         
-        segments[j].loadUserPos(userPoses)
-        segments[j].loadCtrlPos(ctrlPoses)
+    #     segments[j].loadUserPos(userPoses)
+    #     segments[j].loadCtrlPos(ctrlPoses)
+        
+    for userPoint in seg.userPoints:
+        cornerUX.append(userPoint.x)
+        cornerUY.append(userPoint.y)
+    
+    for ctrlPoint in seg.ctrlPoints:
+        cornerCX.append(ctrlPoint.x)
+        cornerCY.append(ctrlPoint.y)
+    
+    for x in cornerUX: adjUX.append(x + (USER_POINT_WIDTH / 2))
+    for y in cornerUY: adjUY.append(y + (USER_POINT_HEIGHT / 2))
+    for x in cornerCX: adjCX.append(x + (CTRL_POINT_WIDTH / 2))
+    for y in cornerCY: adjCY.append(y + (CTRL_POINT_HEIGHT / 2))
+    
+    userPoses = util.arToPos(adjUX, adjUY)
+    ctrlPoses = util.arToPos(adjCX, adjCY)
+    
+    for i in range(len(userPoses)): userPoses[i] = scaleCoords(userPoses[i]) 
+    for i in range(len(ctrlPoses)): ctrlPoses[i] = scaleCoords(ctrlPoses[i])
+    
+    # print(ctrlPoses[0])
+    # print(userPoses[0])
+    
+    for i in range(len(ctrlPoses)): ctrlPoses[i] = util.turnToVector(ctrlPoses[i], userPoses[i]); ctrlPoses[i] = util.scalePos(ctrlPoses[i], CTRL_VEC_SCALING_CONST)
+    
+    # print(ctrlPoses[0])
+    # print(userPoses[0])
+    
+    seg.loadUserPos(userPoses)
+    seg.loadCtrlPos(ctrlPoses)
     #run this at the end to loop thorugh all points and control points, currently the thing is being fed only where they pressed k, not the final pos
         
 def updateSpline(poses):#this needes to be in real time
@@ -209,8 +264,7 @@ def updateSpline(poses):#this needes to be in real time
     
     for i in range(len(newPoses) - 1):
         # print(poses[i], poses[i+1])
-        pg.draw.line(WIN, SPLINE_LINE_CLR, newPoses[i], newPoses[i+1], 2)
-    
+        pg.draw.line(WIN, SPLINE_LINE_CLR, newPoses[i], newPoses[i+1], 2)  
     
     # for pos in newPoses:
     #     pg.draw.circle(WIN, GREEN, pos, 1, 0)
@@ -228,6 +282,14 @@ def collateSegPoints(choice):
     elif choice.lower() == "ctrl":
         return ctrlPts
         
+def createNewSegment():
+    global currentSegment
+    if segments[-1].concluded == True:
+        segments.append(hm.segment())
+        print(segments[-1].userPoints)
+    currentSegment = len(segments) - 1 #update current segment
+    
+    print(segments)
 
 #----------------------------------------------------- MAIN
 def main():

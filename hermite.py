@@ -11,6 +11,7 @@ class point:
     end = False
     
 class segment:
+    concluded = False
     userPoints = []
     ctrlPoints = []
     def __init__(self):
