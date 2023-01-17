@@ -1,0 +1,3 @@
+from hermite import *
+
+calcVelocities()

@@ -42,6 +42,71 @@ def turnToVector(pos, pos1):
 def addVector(pos, vec):
     return (pos[0] + vec[0], pos[1] + vec[1]) 
 
+def distance(pt1, pt2):
+    return ((pt1[0] - pt2[0])**2.0 + (pt1[1] - pt2[1])**2.0)**0.5
+
+def ar_add(ar1, ar2):
+    output = [None] * len(ar1) 
+    # if np.any(ar2 != None):
+    for i in range(len(ar1)):
+        output[i] = ar1[i] + ar2[i]
+    return output
+    # else:
+    #     for i in range(len(ar1)):
+    #         output[i] = ar1[i] + const
+    #     return output
+    
+def ar_minus(ar1, ar2):
+    output = [None] * len(ar1) 
+    # if np.any(ar2 != None):
+    for i in range(len(ar1)):
+        output[i] = ar1[i] - ar2[i]
+    return output
+    # else:
+    #     for i in range(len(ar1)):
+    #         output[i] = ar1[i] - const
+    #     return output
+
+def ar_times(ar1, ar2):
+    output = [None] * len(ar1) 
+    # if np.any(ar2 != None):
+    for i in range(len(ar1)):
+        output[i] = ar1[i] * ar2[i]
+    return output
+    # else:
+    #     for i in range(len(ar1)):
+    #         output[i] = ar1[i] * const
+    #     return output
+
+def ar_divide(ar1, ar2):
+    output = [None] * len(ar1) 
+    # if np.any(ar2 != None):
+    for i in range(len(ar1)):
+        output[i] = ar1[i] / ar2[i]
+    return output
+    # else:
+    #     for i in range(len(ar1)):
+    #         output[i] = ar1[i] / const
+    #     return output
+    
+def ar_power(ar1, ar2):
+    output = [None] * len(ar1) 
+    # if np.any(ar2 != None):
+    for i in range(len(ar1)):
+        output[i] = ar1[i] ** ar2[i]
+    return output
+    # else:
+    #     for i in range(len(ar1)):
+    #         output[i] = ar1[i] ** const
+    #     return output
+    
+def ar_power_const(ar1, const = 0.0):
+    output = [None] * len(ar1)
+    for i in range(len(ar1)):
+        output[i] = ar1[i] ** const
+    return output
+
+
 def drawDashedLine(surface, color, start_pos, end_pos, width = 1, dash_length = 10, exclude_corners = True):
     
     # convert tuples to numpy arrays
