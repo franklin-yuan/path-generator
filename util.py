@@ -91,8 +91,5 @@ def delPoint(event, ar1, ar2): #ar1 and ar2 are arrays of objects that can be cl
                     ar2.pop(ar1.index(object))
                     ar1.remove(object)
                     
-
-    
-                    
     
 
