@@ -1,3 +1,3 @@
 from hermite import *
 
-calcVelocities()
+calcVelocities(0, 0)

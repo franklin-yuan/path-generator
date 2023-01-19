@@ -172,63 +172,222 @@ def writeToTxt():
         n += 1
     txt.close()
     
-def calcVelocities():
+# def calcVelocities():
     
-    v = 0.0
-    omega = 0.0 
-    #angular vel
-    #tangential vel
+#     v = 0.0
+#     omega = 0.0 
+#     #angular vel
+#     #tangential vel
     
-    v_max = 100;
-    a_t_max = 20;
-    a_omega_max = 20;
-    omega_max = 100;
-    f_max = 3
-    #consts
+#     v_max = 100;
+#     a_t_max = 20;
+#     a_omega_max = 20;
+#     omega_max = 100;
+#     f_max = 3
+#     #consts
+    
+#     txt = open('paths/path.txt', 'r')
+#     read = txt.readlines()
+    
+#     pts = []
+#     vel = []
+    
+#     for line in read:
+#         linecoords = line.split()
+#         for i in range(2):
+#             linecoords[i] = float(linecoords[i])
+#         pts.append(linecoords)
+        
+#     vel = [None] * len(pts)
+    
+#     #parse data from path 
+    
+#     print(pts)
+    
+#     dt = v_i = ds = a_t = c_i = 0
+    
+#     #dt = delta t, v_t is velocity (tangential) at i, ds is delta s (arc length), a_t is tangential accel, c_i is curvature at i
+    
+#     startv = 0
+#     endv = 0
+    
+#     vel[0] = startv
+    
+#     arcl_i = 0
+    
+#     for i in range(1, len(pts) - 1):
+#         c_i = pts[i][2]
+        
+#         vel_t_max = (vel[i-1]**2.0 + 2*ds*a_t_max)
+        
+#         dt = (2 * util.distance((pts[i][0], pts[i][1]), (pts[i-1][0], pts[i-1][1]))) / (vel[i] + vel[i-1])
+        
+        
+#         v_max_omega = 0.0;
+        
+#         v_max_omega = omega_max / abs(c_i)
+        
+#         v_min_a_t = v[i-1] - a_t_max * dt
+#         v_max_a_t = v[i-1] + a_t_max * dt
+        
+#         v_hat = (2 * ds * a_omega_max) / c_i * v[i-1]
+
+def calcVelocities(v_start: float, v_end: float) -> tuple[float, float]:
+    
+    #CONSTS
+    a_rad_max = 2; #ms^-2
+    a_tan_max = 1.5; #ms^-2
+    v_max = 4
     
     txt = open('paths/path.txt', 'r')
     read = txt.readlines()
     
     pts = []
-    vel = []
+    c = [] #curvatures
+    omega = [] #omegalul
     
     for line in read:
         linecoords = line.split()
-        for i in range(2):
+        for i in range(3):
             linecoords[i] = float(linecoords[i])
         pts.append(linecoords)
         
-    vel = [None] * len(pts)
-    
-    #parse data from path 
-    
-    print(pts)
-    
-    dt = v_i = ds = a_t = c_i = 0
-    
-    #dt = delta t, v_t is velocity (tangential) at i, ds is delta s (arc length), a_t is tangential accel, c_i is curvature at i
-    
-    startv = 0
-    endv = 0
-    
-    vel[0] = startv
-    
-    arcl_i = 0
-    
-    for i in range(1, len(pts) - 1):
-        c_i = pts[i][2]
+    for x in pts:
+        c.append(x[2])
         
-        vel_t_max = (vel[i-1]**2.0 + 2*ds*a_t_max)
+    v = [None] * len(pts) #velocities
+    
+    # plotPointsWithT(c)
         
-        dt = (2 * util.distance((pts[i][0], pts[i][1]), (pts[i-1][0], pts[i-1][1]))) / (vel[i] + vel[i-1])
+    v[0] = v_start #set first vel to userinput start value
+    v[len(pts) - 1] = v_end #and same here but for end
+
+    t = 0
+    d = 0
+    A = a_tan_max ** 2 # max tangential accel ^ 2 just for naming
+    B = a_rad_max ** 2 # max radial accel ^ 2 just for naming
+    
+    for i in range(len(pts) - 1):
+    
         
+        #just for naming, _i means current point, _ii means i+1 or next pt
         
-        v_max_omega = 0.0;
+        v_i = v_ii = c_i = 0
         
-        v_max_omega = omega_max / abs(c_i)
+        v_i = v[i]
+        c_i = c[i]
         
-        v_min_a_t = v[i-1] - a_t_max * dt
-        v_max_a_t = v[i-1] + a_t_max * dt
+        dt = ds = 0
         
-        v_hat = (2 * ds * a_omega_max) / c_i * v[i-1]
+        pt_i = pts[i]
+        pt_ii = pts[i+1]
         
+        ds = util.distance(pt_i, pt_ii)
+        
+        # v_ii = (B * v[0] + (A * (B ** 2.0) * (t ** 2.0) - A * B * (((v_i ** 2.0) * c_i) ** 2.0)) ** 0.5) / B
+        
+        v_ii = (v_i ** 2 + 2 * a_tan_max * ds) ** 0.5
+        
+        # print(v_ii)
+        a_tan = a_rad = 0
+        
+        dt = (2 * ds) / (v_i + v_ii)
+        
+        # print(dt)
+        
+        t += dt
+        d += ds
+        v[i+1] = v_ii
+        
+    v = correctPlotBackwards(pts, v, c, a_tan_max, a_rad_max, v_max, v_end)
+    fixTimePlot(pts, v)
+    print(d)
+    # print(v)
+    
+    # plotPointsWithT(v)
+        
+    #plt.show()
+    
+    
+
+
+
+def plotPointsWithT(x): #this is garbage so probably don't use it
+    t = 0
+    plt.figure(figsize=(10, 10))
+    for i in range(len(x)):
+        plt.plot(t, x[i], '.b', markersize = 6.0)
+        t += 0.1
+        
+    plt.show()
+    
+def correctPlotBackwards(pts, v, c, a_tan_max, a_rad_max, v_max, end):
+    v[len(v) - 1] = end
+    # print(v)
+    for i in range((len(v) - 1), 0, -1):
+        v_i = v_ii = c_i = 0
+        v_i = v[i]
+        v_ii_a = v[i-1]
+        c_i = c[i]
+        
+        dt = ds = 0
+        
+        pt_i = pts[i]
+        pt_ii = pts[i-1]
+        
+        ds = util.distance(pt_i, pt_ii)    
+        
+        v_ii = (v_i ** 2 + 2 * a_tan_max * ds) ** 0.5
+        
+        v_ii = min(v_ii_a, v_ii)
+        v_ii = min(v_max, v_ii)
+        
+        # print(v_ii)
+        
+        v[i-1] = v_ii
+        
+    return v
+        
+def min(a, b):
+    if a > b:
+        return b
+    elif b > a:
+        return a
+    else:
+        print("it didnt work lmao")
+    
+def fixTimePlot(pts, v):
+    t_ar = []
+    t = 0
+    for i in range(len(pts) - 1):
+        
+        v_i = v_ii = 0
+        
+        v_i = v[i]
+        v_ii = v[i+1]
+        
+        dt = ds = 0
+        
+        pt_i = pts[i]
+        pt_ii = pts[i+1]
+        
+        ds = util.distance(pt_i, pt_ii)
+        
+        dt = (2 * ds) / (v_i + v_ii)
+        # print(dt)
+        
+        t += dt
+        
+        t_ar.append(t)
+        
+    t += dt
+    t_ar.append(t)
+        
+    print(t_ar)
+    
+    plt.plot(t_ar, v, ".k", linewidth = 2)
+    
+    plt.show()
+    
+    
+    return t
