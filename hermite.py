@@ -235,8 +235,8 @@ def writeToTxt():
 def calcVelocities(v_start: float, v_end: float) -> tuple[float, float]:
     
     #CONSTS
-    a_rad_max = 2; #ms^-2
-    a_tan_max = 1.5; #ms^-2
+    a_rad_max = 4; #ms^-2
+    a_tan_max = 3; #ms^-2
     v_max = 4
     
     txt = open('paths/path.txt', 'r')
@@ -295,12 +295,74 @@ def calcVelocities(v_start: float, v_end: float) -> tuple[float, float]:
         
         # print(dt)
         
+        #-------------------------------------------------------------------
+        
+        c_ii = c[i+1]
+        
+        v_1 = abs((1 / (2 * c_ii)) * ((c_ii - c_i) * v_i + ((c_i + c_ii) ** 2.0 * v_i ** 2.0 + 8 * c_ii * ds * a_rad_max ** 0.5))) #huh
+        v_2 = abs((1 / (2 * c_ii)) * ((c_ii - c_i) * v_i - ((c_i + c_ii) ** 2.0 * v_i ** 2.0 + 8 * c_ii * ds * a_rad_max ** 0.5)))
+        
+        print(v_1, v_2)
+        
+        v_star_1 = abs((1 / (2 * c_ii)) * ((c_ii - c_i) * v_i + ((c_i + c_ii) ** 2.0 * v_i ** 2.0 - 8 * c_ii * ds * a_rad_max ** 0.5)))
+        v_star_2 = abs((1 / (2 * c_ii)) * ((c_ii - c_i) * v_i - ((c_i + c_ii) ** 2.0 * v_i ** 2.0 - 8 * c_ii * ds * a_rad_max ** 0.5))) #bruh 
+        
+        print(v_star_1, v_star_2)
+        
+        if c_ii > 0:
+            print("yo")
+            if (c_ii + c_i) ** 2 * v_i ** 2 - 8 * c_ii * a_rad_max * ds < 0:
+                v_ii = min(v_1, v_ii)
+            elif (c_ii + c_i) ** 2 * v_i ** 2 - 8 * c_ii * a_rad_max * ds >= 0:
+                v_ii = min(v_i, v_ii)
+                v_ii = min(v_star_2, v_ii)
+                
+        elif c_ii < 0:
+            print("smh")
+            if (c_ii + c_i) ** 2 * v_i ** 2 + 8 * c_ii * a_rad_max * ds < 0:
+                v_ii = min(v_star_2, v_ii)
+            elif (c_ii + c_i) ** 2 * v_i ** 2 + 8 * c_ii * a_rad_max * ds >= 0:
+                v_ii = min(v_1, v_ii)
+                v_ii = min(v_star_2, v_ii)
+                
+        elif c_ii == 0:
+            print("pog")
+            v_hat_1 = -((2 * ds * a_rad_max) / (c_i * v_i)) - v_i
+            v_hat_2 = ((2 * ds * a_rad_max) / (c_i * v_i)) - v_i
+            if c_i > 0:
+                v_ii = min(v_hat_2, v_ii)
+            elif c_i > 0:
+                v_ii = min(v_hat_1, v_ii)
+            else:
+                pass; #v_ii can be any real number when explicitly bounded by a_rad
+        
+        print(v_ii)
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        #-------------------------------------------------------------------
+        
+        
         t += dt
         d += ds
         v[i+1] = v_ii
         
     v = correctPlotBackwards(pts, v, c, a_tan_max, a_rad_max, v_max, v_end)
-    fixTimePlot(pts, v)
+    fixTimePlot(pts, v, c)
     print(d)
     # print(v)
     
@@ -356,7 +418,7 @@ def min(a, b):
     else:
         print("it didnt work lmao")
     
-def fixTimePlot(pts, v):
+def fixTimePlot(pts, v, c):
     t_ar = []
     t = 0
     for i in range(len(pts) - 1):
@@ -385,7 +447,11 @@ def fixTimePlot(pts, v):
         
     print(t_ar)
     
-    plt.plot(t_ar, v, ".k", linewidth = 2)
+    fig, (ax1, ax2) = plt.subplots(2)
+    ax1.plot(t_ar, v, ".k", linewidth = 2)
+    ax2.plot(t_ar, c, ".b", linewidth = 2)
+
+    
     
     plt.show()
     
