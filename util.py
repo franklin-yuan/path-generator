@@ -106,6 +106,12 @@ def ar_power_const(ar1, const = 0.0):
         output[i] = ar1[i] ** const
     return output
 
+def ar_divide_const(ar1, const = 0.0):
+    output = [None] * len(ar1)
+    for i in range(len(ar1)):
+        output[i] = ar1[i] / const
+    return output
+
 
 def drawDashedLine(surface, color, start_pos, end_pos, width = 1, dash_length = 10, exclude_corners = True):
     

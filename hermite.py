@@ -125,7 +125,7 @@ def calcPts(res):
     for i in range(len(xpoints)-1):
         t = 0
         while t < 1:
-            t += 0.01
+            t += 0.005
             point1.x = xpoints[i]
             point2.x = xpoints[i+1]
             point1.y = ypoints[i]
@@ -232,19 +232,19 @@ def writeToTxt():
         
 #         v_hat = (2 * ds * a_omega_max) / c_i * v[i-1]
 
-def calcVelocities(v_start: float, v_end: float) -> tuple[float, float]:
+def calcVelocities(v_start: float, v_end: float, omega_start: float, omega_end: float) -> tuple[float, float]:
     
     #CONSTS
-    a_rad_max = 4; #ms^-2
-    a_tan_max = 3; #ms^-2
-    v_max = 4
+    a_rad_max = 2; #ms^-2
+    a_tan_max = 2; #ms^-2
+    v_max = 6
+    omega_max = 4
     
     txt = open('paths/path.txt', 'r')
     read = txt.readlines()
     
     pts = []
     c = [] #curvatures
-    omega = [] #omegalul
     
     for line in read:
         linecoords = line.split()
@@ -254,18 +254,23 @@ def calcVelocities(v_start: float, v_end: float) -> tuple[float, float]:
         
     for x in pts:
         c.append(x[2])
-        
+    
+    omega = [None] * len(pts) #omegalul
     v = [None] * len(pts) #velocities
     
     # plotPointsWithT(c)
         
     v[0] = v_start #set first vel to userinput start value
     v[len(pts) - 1] = v_end #and same here but for end
+    omega[0] = omega_start
+    omega[len(pts) - 1] = omega_end 
 
     t = 0
     d = 0
     A = a_tan_max ** 2 # max tangential accel ^ 2 just for naming
     B = a_rad_max ** 2 # max radial accel ^ 2 just for naming
+    
+    c = util.ar_divide_const(c, 5)
     
     for i in range(len(pts) - 1):
     
@@ -299,44 +304,65 @@ def calcVelocities(v_start: float, v_end: float) -> tuple[float, float]:
         
         c_ii = c[i+1]
         
-        v_1 = abs((1 / (2 * c_ii)) * ((c_ii - c_i) * v_i + ((c_i + c_ii) ** 2.0 * v_i ** 2.0 + 8 * c_ii * ds * a_rad_max ** 0.5))) #huh
-        v_2 = abs((1 / (2 * c_ii)) * ((c_ii - c_i) * v_i - ((c_i + c_ii) ** 2.0 * v_i ** 2.0 + 8 * c_ii * ds * a_rad_max ** 0.5)))
+        # print(v_ii, ds)
         
-        print(v_1, v_2)
+        v_max_omega = omega_max / abs(c_ii)
         
-        v_star_1 = abs((1 / (2 * c_ii)) * ((c_ii - c_i) * v_i + ((c_i + c_ii) ** 2.0 * v_i ** 2.0 - 8 * c_ii * ds * a_rad_max ** 0.5)))
-        v_star_2 = abs((1 / (2 * c_ii)) * ((c_ii - c_i) * v_i - ((c_i + c_ii) ** 2.0 * v_i ** 2.0 - 8 * c_ii * ds * a_rad_max ** 0.5))) #bruh 
+        v_ii = min(v_ii, v_max_omega)
         
-        print(v_star_1, v_star_2)
-        
+        omega_ii = 0
+        omega_i = omega[i]
+
+        v_1 = (1 / (2 * c_ii)) * ((c_ii - c_i) * v_i + ((c_i + c_ii) ** 2.0 * v_i ** 2.0 + 8 * c_ii * ds * a_rad_max ** 0.5)) #huh
+        v_2 = (1 / (2 * c_ii)) * ((c_ii - c_i) * v_i - ((c_i + c_ii) ** 2.0 * v_i ** 2.0 + 8 * c_ii * ds * a_rad_max ** 0.5))
+
+        # print(v_1, v_2)
+        v_star_1 = (1 / (2 * c_ii)) * ((c_ii - c_i) * v_i + ((c_i + c_ii) ** 2.0 * v_i ** 2.0 - 8 * c_ii * ds * a_rad_max ** 0.5))
+        v_star_2 = (1 / (2 * c_ii)) * ((c_ii - c_i) * v_i - ((c_i + c_ii) ** 2.0 * v_i ** 2.0 - 8 * c_ii * ds * a_rad_max ** 0.5)) #bruh 
+
+        # v_1 = (1 / (2 * c_ii)) * ((c_ii - c_i) * omega_i + ((c_i + c_ii) ** 2.0 * omega_i ** 2.0 + 8 * c_ii * ds * a_rad_max ** 0.5)) #huh
+        # v_2 = (1 / (2 * c_ii)) * ((c_ii - c_i) * omega_i - ((c_i + c_ii) ** 2.0 * omega_i ** 2.0 + 8 * c_ii * ds * a_rad_max ** 0.5))
+            
+        # v_star_1 = (1 / (2 * c_ii)) * ((c_ii - c_i) * omega_i + ((c_i + c_ii) ** 2.0 * omega_i ** 2.0 - 8 * c_ii * ds * a_rad_max ** 0.5))
+        # v_star_2 = (1 / (2 * c_ii)) * ((c_ii - c_i) * omega_i - ((c_i + c_ii) ** 2.0 * omega_i ** 2.0 - 8 * c_ii * ds * a_rad_max ** 0.5)) #bruh \
+
+        # print(v_star_1, v_star_2)
+
         if c_ii > 0:
             print("yo")
             if (c_ii + c_i) ** 2 * v_i ** 2 - 8 * c_ii * a_rad_max * ds < 0:
-                v_ii = min(v_1, v_ii)
+                omega_ii = constrainRange(omega_ii, v_2, v_1)
             elif (c_ii + c_i) ** 2 * v_i ** 2 - 8 * c_ii * a_rad_max * ds >= 0:
-                v_ii = min(v_i, v_ii)
-                v_ii = min(v_star_2, v_ii)
+                max_v = max(v_star_2, v_1)
+                min_v = min(v_2, v_star_1)
+                omega_ii = constrainRange(omega_ii, min_v, max_v)
                 
         elif c_ii < 0:
             print("smh")
             if (c_ii + c_i) ** 2 * v_i ** 2 + 8 * c_ii * a_rad_max * ds < 0:
-                v_ii = min(v_star_2, v_ii)
+                omega_ii = constrainRange(omega_ii, v_star_1, v_star_2)
             elif (c_ii + c_i) ** 2 * v_i ** 2 + 8 * c_ii * a_rad_max * ds >= 0:
-                v_ii = min(v_1, v_ii)
-                v_ii = min(v_star_2, v_ii)
-                
+                max_v = max(v_1, v_star_2)
+                min_v = min(v_star_1, v_2)
+                omega_ii = constrainRange(omega_ii, min_v, max_v)
+
         elif c_ii == 0:
             print("pog")
             v_hat_1 = -((2 * ds * a_rad_max) / (c_i * v_i)) - v_i
             v_hat_2 = ((2 * ds * a_rad_max) / (c_i * v_i)) - v_i
             if c_i > 0:
-                v_ii = min(v_hat_2, v_ii)
+                omega_ii = constrainRange(omega_ii, v_hat_1, v_hat_2)
             elif c_i > 0:
-                v_ii = min(v_hat_1, v_ii)
+                omega_ii = constrainRange(omega_ii, v_hat_2, v_hat_1)
             else:
                 pass; #v_ii can be any real number when explicitly bounded by a_rad
+
+        omega[i+1] = omega_ii
         
-        print(v_ii)
+        # print(omega)
+        # print(v_ii)
+        
+        print(omega_ii)
         
         
         
@@ -361,9 +387,11 @@ def calcVelocities(v_start: float, v_end: float) -> tuple[float, float]:
         d += ds
         v[i+1] = v_ii
         
-    v = correctPlotBackwards(pts, v, c, a_tan_max, a_rad_max, v_max, v_end)
-    fixTimePlot(pts, v, c)
-    print(d)
+    v = correctPlotBackwards(pts, v, c, a_tan_max, a_rad_max, v_max, v_start, v_end)
+    omega = correctRad(omega, timeToAr(pts, v), omega_max, a_rad_max, omega_start, omega_end)
+    fixTimePlot(pts, v, c, omega)
+    
+    # print(d)
     # print(v)
     
     # plotPointsWithT(v)
@@ -383,11 +411,12 @@ def plotPointsWithT(x): #this is garbage so probably don't use it
         
     plt.show()
     
-def correctPlotBackwards(pts, v, c, a_tan_max, a_rad_max, v_max, end):
+def correctPlotBackwards(pts, v, c, a_tan_max, a_rad_max, v_max, start, end):
     v[len(v) - 1] = end
+    v[0] = start
+    v_i = v_ii = c_i = 0
     # print(v)
     for i in range((len(v) - 1), 0, -1):
-        v_i = v_ii = c_i = 0
         v_i = v[i]
         v_ii_a = v[i-1]
         c_i = c[i]
@@ -408,17 +437,137 @@ def correctPlotBackwards(pts, v, c, a_tan_max, a_rad_max, v_max, end):
         
         v[i-1] = v_ii
         
-    return v
+    # print(v)
+    
+    for i in range(0, (len(v) - 1), 1):
+        v_i = v[i]
         
-def min(a, b):
+        # print(v)
+        
+        # print(v[i])
+        
+        v_ii_a = v[i+1]
+        c_i = c[i]
+        
+        dt = ds = 0
+        
+        pt_i = pts[i]
+        pt_ii = pts[i+1]
+        
+        ds = util.distance(pt_i, pt_ii)  
+        
+        # print(v_i)
+        
+        v_ii = (v_i ** 2 + 2 * a_tan_max * ds) ** 0.5
+        
+        v_ii = min(v_ii_a, v_ii)
+        
+        # print(v_ii)
+        
+        v[i+1] = v_ii
+        
+    return v
+
+def correctRad(omega, t, omega_max, a_rad_max, omega_start, omega_end):
+    omega[0] = omega_start
+    omega[len(omega) - 1] = omega_end 
+    for i in range(len(omega)- 1):
+        
+        dt = t[i+1] - t[i]
+        
+        omega_i = omega[i]
+        omega_ii_a = omega[i+1]
+        omega_ii = omega_i + a_rad_max * dt
+        omega_ii = min(omega_ii, omega_max)
+        omega_ii = min(omega_ii, omega_ii_a)
+        
+        omega[i+1] = omega_ii
+        
+    for i in range(len(omega)- 1, 0, -1):
+        
+        dt = t[i] - t[i-1]
+        
+        omega_i = omega[i]
+        omega_ii_a = omega[i-1]
+        omega_ii = omega_i + a_rad_max * dt
+
+        omega_ii = min(omega_ii, omega_ii_a)
+        
+        omega[i-1] = omega_ii
+    
+    
+    return omega
+    # for curv in c:
+    #     omega.append(curv)
+    
+    # omega[0] = start
+    # omega[len(omega) - 1] = end
+    
+    # print(omega)
+        
+    # for i in range((len(omega) - 1)):
+    #     print(i)
+    #     omega_i = omega[i]
+    #     c_i = c[i]
+    #     c_ii = c[i+1]
+    #     omega_ii = omega_i + a_rad_max
+        
+        
+    #     print(omega_ii)
+        
+    #     omega_ii = min(omega_ii, c_ii)
+    #     omega_ii = min(omega_ii, omega_max)
+        
+    #     print(-omega_max)
+    #     omega_ii = max(omega_ii, -omega_max)
+        
+    #     omega[i+1] = omega_ii
+        
+    # for i in range((len(omega) - 1), 0, -1):
+    #     omega_i = omega[i]
+    #     c_ii = c[i-1]
+    #     omega_ii_a = omega[i-1]
+    #     omega_ii = omega_i + a_rad_max
+        
+    #     omega_ii = min(omega_ii_a, c_ii)
+    #     omega_ii = min(omega_ii, omega_max)
+    #     omega_ii = max(omega_ii, -omega_max)
+        
+    #     omega[i-1] = omega_ii
+    
+    return omega
+        
+    
+def min(a: float, b: float) -> float:
     if a > b:
         return b
     elif b > a:
         return a
+    elif a == b:
+        return a
     else:
         print("it didnt work lmao")
-    
-def fixTimePlot(pts, v, c):
+        
+def max(a: float, b:float) -> float:
+    if a > b:
+        return a
+    elif b > a:
+        return b
+    elif a == b:
+        return a
+    else:
+        print("it didnt work lmao")
+        
+def constrainRange(x, min: float, max: float) -> float:
+    if min <= x <= max:
+        return max
+    elif x < min:
+        return min
+    else:
+        return max
+
+
+def timeToAr(pts, v):
     t_ar = []
     t = 0
     for i in range(len(pts) - 1):
@@ -441,15 +590,31 @@ def fixTimePlot(pts, v, c):
         t += dt
         
         t_ar.append(t)
-        
     t += dt
     t_ar.append(t)
-        
-    print(t_ar)
+    return t_ar
     
-    fig, (ax1, ax2) = plt.subplots(2)
+def fixTimePlot(pts, v, c, o):
+    t_ar = timeToAr(pts, v)
+        
+    # print(t_ar)
+    
+    fig, (ax1, ax2, ax3) = plt.subplots(3)
+    
+    ax1.set_title("linear velocity over time")
+    ax1.set_xlabel("t")
+    ax1.set_ylabel("v")
+    ax2.set_title("angular velocity over time")
+    ax2.set_xlabel("t")
+    ax2.set_ylabel("omega")
+    ax3.set_title("curvature over time")
+    ax3.set_xlabel("t")
+    ax3.set_ylabel("kappa")
+
     ax1.plot(t_ar, v, ".k", linewidth = 2)
-    ax2.plot(t_ar, c, ".b", linewidth = 2)
+    ax2.plot(t_ar, o, ".b", linewidth = 2)
+    ax3.plot(t_ar, c, ".m", linewidth = 2)
+    
 
     
     
