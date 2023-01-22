@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import util
+import math
 
 #----------------------------------------------------- ALL SPLINE GLOBALS
 
@@ -169,6 +170,7 @@ def calcPts(res):
 
 def writeToTxt(vel = False):
     global calcPtsAr
+    origin_u = []
     txt = open('../Robot/src/path.cpp', 'w')
     n = 0
     if vel == False:
@@ -180,9 +182,13 @@ def writeToTxt(vel = False):
             
     elif vel == True:
         txt.write('#include "main.h" \n#include <vector> \nstd::vector<std::vector<double>> path = { \n')
+        origin_u = calcPtsAr[0]
         for pos in calcPtsAr:
             # print(str(pos[0]))
-            entry = "{" + str(pos[0]) + ", " + str(pos[1]) + ", " + str(v_global[n]) + ", " + str(omega_global[n]) + "},\n"
+            # print(origin_u)
+            adj_pos = (pos[0] - origin_u[0], pos[1] - origin_u[1])
+            
+            entry = "{" + str(adj_pos[0]) + ", " + str(adj_pos[1]) + ", " + str(v_global[n]) + ", " + str(omega_global[n]) + "},\n"
             # print(entry)
             txt.write(entry)
             n += 1
@@ -258,10 +264,10 @@ def calcVelocities(v_start: float, v_end: float, omega_start: float, omega_end: 
     global v_global, omega_global
     
     #CONSTS
-    a_rad_max = 200; #cms^-2
-    a_tan_max = 200; #cms^-2
-    v_max = 200
-    omega_max = 200
+    a_rad_max = 3 * 2 * 100 * 100 * math.pi; 
+    a_tan_max = 2971.8; #cms^-2
+    v_max = 6000;
+    omega_max = 6 * 2 * math.pi * 100 * 100
     
     txt = open('../Robot/src/path.cpp', 'r')
     read = txt.readlines()
@@ -293,7 +299,7 @@ def calcVelocities(v_start: float, v_end: float, omega_start: float, omega_end: 
     A = a_tan_max ** 2 # max tangential accel ^ 2 just for naming
     B = a_rad_max ** 2 # max radial accel ^ 2 just for naming
     
-    c = util.ar_divide_const(c, 5)
+    c = util.ar_divide_const(c, 1)
     
     for i in range(len(pts) - 1):
     
@@ -330,6 +336,8 @@ def calcVelocities(v_start: float, v_end: float, omega_start: float, omega_end: 
         # print(v_ii, ds)
         
         v_max_omega = omega_max / abs(c_ii)
+        
+        print(v_max_omega)
         
         v_ii = min(v_ii, v_max_omega)
         

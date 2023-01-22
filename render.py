@@ -55,9 +55,9 @@ PATH_DOT_IMAGE = pg.transform.scale(PATH_DOT_IMAGE, (PATH_DOT_WIDTH, PATH_DOT_HE
 INSTRUC_FONT = pg.font.SysFont('arial', 20)
 
 SCALING_CONST = 360 #360cm #Arbitrary units for how tall / wide the field should be
-CONTROL_SHIFT_HEIGHT = (1 / SCALING_CONST) * ACTIVE_RANGE_Y_N
+CONTROL_SHIFT_HEIGHT = SCALING_CONST / 10
 
-CTRL_VEC_SCALING_CONST = 10
+CTRL_VEC_SCALING_CONST = 5
 
 SPLINE_RESOLUTION_WIN = 15 #how many line segments that will be rendered between 2 target points (well how many points calculated but pretty much same thing), this one is for the draggable window, lower to improve performance
 SPLINE_RESOLUTION_MPL = 25 #this one is for the graph that pops up
@@ -113,7 +113,7 @@ def unscaleCoords(pos):
     # print(x,y)
     
     return (x,y)
-    
+
 def inRangeOfField(pos):
     if pos[0] >= ACTIVE_RANGE_X[0] and pos[0] <= ACTIVE_RANGE_X[1] and pos[1] >= ACTIVE_RANGE_Y[0] and pos[1] <= ACTIVE_RANGE_Y[1]:
         return True
@@ -198,7 +198,7 @@ def updateSpline(poses):#this needes to be in real time
     for pos in poses:
         newPos = unscaleCoords(pos)
         newPoses.append(newPos)
-    
+
     for i in range(len(newPoses) - 1):
         # print(poses[i], poses[i+1])
         pg.draw.line(WIN, SPLINE_LINE_CLR, newPoses[i], newPoses[i+1], 2)
