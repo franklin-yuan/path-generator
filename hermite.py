@@ -18,6 +18,7 @@ omega_global = []
 xar = []
 yar = []
 car = [] #curvature array
+mar = [] #heading array 
 t = 0.0
 
 #----------------------------------------------------- ALL SPLINE CLASSES
@@ -121,12 +122,14 @@ def drawMPL(res): #draw matplotlib spline
     plt.show()
 
 def calcPts(res):
-    global car
+    global car, mar
     car = []
     newPoses = []
     returnPoses = []
     point1 = point()
     point2 = point()
+    point1_rt = point() #higher defintion #??
+    point2_rt = point()
     for i in range(len(xpoints)-1):
         t = 0
         while t < 1:
@@ -139,6 +142,7 @@ def calcPts(res):
             point2.cx = cxpoints[i+1]
             point1.cy = cypoints[i]
             point2.cy = cypoints[i+1]
+            
             xar.append(findX(point1, point2, t))
             yar.append(findY(point1, point2, t))
             
@@ -155,11 +159,26 @@ def calcPts(res):
             # f = util.ar_power_const(util.ar_add(d, e), 1.5)
             
             kappa = (xFirstDer * ySecondDer - yFirstDer * xSecondDer) / (xFirstDer ** 2.0 + yFirstDer ** 2.0) ** 0.5
-        
+
+            # print(kappa)
         # kappa = util.ar_divide(e, f)
-        
             car.append(kappa)
     # print("\n\n\n\n\n hhHhHh")
+    
+        for i in range(len(xar)):
+            point1_rt.x = xar[i] - xpoints[0] 
+            point1_rt.y = yar[i] - ypoints[0]
+            
+            if i == 0:
+                print(point1_rt.x, point1_rt.y)  
+            
+            #a = (y1 - y2) / ((x1 - x2) ** 2.0 + (y1 - y2) ** 2.0) ** 0.5  
+                   
+            a = (math.pi/4) - math.atan2(point1_rt.y, point1_rt.x)
+            print(a)
+            # print(math.degrees(a))
+            mar.append(math.degrees(a))
+            
     
     newPoses = util.arToPos(xar, yar)
     for pos in newPoses:
@@ -188,7 +207,7 @@ def writeToTxt(vel = False):
             # print(origin_u)
             adj_pos = (pos[0] - origin_u[0], pos[1] - origin_u[1])
             
-            entry = "{" + str(adj_pos[0]) + ", " + str(adj_pos[1]) + ", " + str(v_global[n]) + ", " + str(omega_global[n]) + "},\n"
+            entry = "{" + str(adj_pos[0]) + ", " + str(adj_pos[1]) + ", " + str(mar[n]) + ", " + str(v_global[n]) + ", " + str(omega_global[n]) + "},\n"
             # print(entry)
             txt.write(entry)
             n += 1
@@ -337,7 +356,7 @@ def calcVelocities(v_start: float, v_end: float, omega_start: float, omega_end: 
         
         v_max_omega = omega_max / abs(c_ii)
         
-        print(v_max_omega)
+        # print(v_max_omega)
         
         v_ii = min(v_ii, v_max_omega)
         
