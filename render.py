@@ -2,6 +2,7 @@ import os
 import pygame as pg 
 import hermite as hm
 import util 
+import config
 
 pg.font.init()
 
@@ -75,6 +76,7 @@ def drawWindow(robot):
     renderText()
     updateUserPoint()
     updateCtrlPoint()
+    pg.draw.circle(WIN, GREEN, unscaleCoords([config.hardOrigin[0], config.hardOrigin[1]]), CTRL_CIRCLE_RAD, 3) 
     
     if len(userPoints) >= 2:
         parseAllCoords()

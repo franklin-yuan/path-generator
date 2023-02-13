@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import util
 import math
+import config
 
 #----------------------------------------------------- ALL SPLINE GLOBALS
 
@@ -190,7 +191,7 @@ def calcPts(res):
 def writeToTxt(vel = False):
     global calcPtsAr
     origin_u = []
-    txt = open('../Robot/src/path.cpp', 'w')
+    txt = open('../Robot/src/path_o.cpp', 'w')
     n = 0
     if vel == False:
         calcPtsAr = calcPts(50)
@@ -205,7 +206,13 @@ def writeToTxt(vel = False):
         for pos in calcPtsAr:
             # print(str(pos[0]))
             # print(origin_u)
-            adj_pos = (pos[0] - origin_u[0], pos[1] - origin_u[1])
+            if not config.useHardOrigin: adj_pos = (pos[0] - origin_u[0], pos[1] - origin_u[1])
+            else: adj_pos = (pos[0] - config.hardOrigin[0], pos[1] - config.hardOrigin[1])
+            if config.flipXY:
+                hold = [None, None]
+                hold[0] = adj_pos[1]
+                hold[1] = adj_pos[0]
+                adj_pos = (hold[0], hold[1])
             print(len(mar), len(car), len(calcPtsAr))
             entry = "{" + str(adj_pos[0]) + ", " + str(adj_pos[1]) + ", " + str(mar[n]) + ", " + str(v_global[n]) + ", " + str(omega_global[n]) + "},\n"
             # print(entry)
@@ -288,7 +295,7 @@ def calcVelocities(v_start: float, v_end: float, omega_start: float, omega_end: 
     v_max = 6000;
     omega_max = 6 * 2 * math.pi * 100 * 100
     
-    txt = open('../Robot/src/path.cpp', 'r')
+    txt = open('../Robot/src/path_o.cpp', 'r')
     read = txt.readlines()
     
     pts = []
