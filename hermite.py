@@ -133,7 +133,7 @@ def calcPts(res):
     for i in range(len(xpoints)-1):
         t = 0
         while t < 1:
-            t += 0.005
+            t += 0.1
             point1.x = xpoints[i]
             point2.x = xpoints[i+1]
             point1.y = ypoints[i]
@@ -157,29 +157,29 @@ def calcPts(res):
             # d = util.ar_power_const(yFirstDer, 2.0)
             # e = util.ar_minus(a, b)
             # f = util.ar_power_const(util.ar_add(d, e), 1.5)
+            # print(kappa)
             
             kappa = (xFirstDer * ySecondDer - yFirstDer * xSecondDer) / (xFirstDer ** 2.0 + yFirstDer ** 2.0) ** 0.5
 
-            # print(kappa)
+            print(kappa)
         # kappa = util.ar_divide(e, f)
             car.append(kappa)
     # print("\n\n\n\n\n hhHhHh")
     
-        for i in range(len(xar)):
-            point1_rt.x = xar[i] - xpoints[0] 
-            point1_rt.y = yar[i] - ypoints[0]
+    for i in range(len(xar) - 1):
+        point1_rt.x = xar[i+1] - xar[i] 
+        point1_rt.y = yar[i+1] - yar[i]
+        
+        # print(point1_rt.x, point1_rt.y)  
+        
+        #a = (y1 - y2) / ((x1 - x2) ** 2.0 + (y1 - y2) ** 2.0) ** 0.5  
+                
+        a = math.atan2(point1_rt.x, point1_rt.y)
+        
+        # print(a)
+        # print(math.degrees(a))
+        mar.append(math.degrees(a))
             
-            if i == 0:
-                print(point1_rt.x, point1_rt.y)  
-            
-            #a = (y1 - y2) / ((x1 - x2) ** 2.0 + (y1 - y2) ** 2.0) ** 0.5  
-                   
-            a = (math.pi/4) - math.atan2(point1_rt.y, point1_rt.x)
-            print(a)
-            # print(math.degrees(a))
-            mar.append(math.degrees(a))
-            
-    
     newPoses = util.arToPos(xar, yar)
     for pos in newPoses:
         returnPoses.append(pos)
@@ -206,7 +206,7 @@ def writeToTxt(vel = False):
             # print(str(pos[0]))
             # print(origin_u)
             adj_pos = (pos[0] - origin_u[0], pos[1] - origin_u[1])
-            
+            print(len(mar), len(car), len(calcPtsAr))
             entry = "{" + str(adj_pos[0]) + ", " + str(adj_pos[1]) + ", " + str(mar[n]) + ", " + str(v_global[n]) + ", " + str(omega_global[n]) + "},\n"
             # print(entry)
             txt.write(entry)
@@ -354,6 +354,8 @@ def calcVelocities(v_start: float, v_end: float, omega_start: float, omega_end: 
         
         # print(v_ii, ds)
         
+        if abs(c_ii) == 0:
+            c_ii += 0.00001
         v_max_omega = omega_max / abs(c_ii)
         
         # print(v_max_omega)
